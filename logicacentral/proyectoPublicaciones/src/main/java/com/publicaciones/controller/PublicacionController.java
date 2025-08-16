@@ -54,7 +54,7 @@ public class PublicacionController {
     @ApiResponse(responseCode = "404", description = "Publicación no encontrada")
     //Obtener pblicaciones por id
     @GetMapping("/{id}")
-    public ResponseEntity<Publicacion> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<Publicacion> obtenerPorId(@PathVariable("id") Long id) {
         return service.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -106,7 +106,7 @@ public class PublicacionController {
     @ApiResponse(responseCode = "200", description = "Publicación actualizada correctamente")
     @ApiResponse(responseCode = "404", description = "Publicación no encontrada")
     @PutMapping("/{id}")
-    public ResponseEntity<Publicacion> actualizar(@PathVariable Long id, @RequestBody Publicacion publicacion) {
+    public ResponseEntity<Publicacion> actualizar(@PathVariable("id") Long id, @RequestBody Publicacion publicacion) {
         return service.buscarPorId(id)
                 .map(p -> {
                     p.setDescripcion(publicacion.getDescripcion());
@@ -123,7 +123,7 @@ public class PublicacionController {
     @ApiResponse(responseCode = "200", description = "Estado actualizado")
     @PostMapping("/{id}/estado")
     public ResponseEntity<Publicacion> cambiarEstado(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody EstadoRequest request) {
         try {
             EstadoPublicacion estado = EstadoPublicacion.valueOf(request.getEstado().toUpperCase());
@@ -163,7 +163,7 @@ public class PublicacionController {
     @Operation(summary = "Eliminar publicación")
     @ApiResponse(responseCode = "204", description = "Publicación eliminada correctamente")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
        }
