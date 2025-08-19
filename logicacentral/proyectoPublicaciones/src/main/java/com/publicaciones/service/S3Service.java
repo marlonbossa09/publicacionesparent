@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 
 // SERVICIO CLIENTE S3
@@ -37,15 +38,22 @@ public class S3Service {
     }
 
     public String subirArchivo(String key, byte[] contenido) {
-    s3.putObject(
-            PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .acl(ObjectCannedACL.PUBLIC_READ)
-                    .contentType("image/png") 
-                    .build(),
-            RequestBody.fromBytes(contenido)
-    );
-    return "https://" + bucket + ".s3.amazonaws.com/" + key;
-}
+        s3.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .acl(ObjectCannedACL.PUBLIC_READ)
+                        .contentType("image/png") 
+                        .build(),
+                RequestBody.fromBytes(contenido)
+        );
+        return "https://" + bucket + ".s3.amazonaws.com/" + key;
+    }
+    public void eliminarArchivo(String key) {
+        s3.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build()
+        );
+    }
 }

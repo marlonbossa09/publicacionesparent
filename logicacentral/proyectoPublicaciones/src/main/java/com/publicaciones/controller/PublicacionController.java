@@ -119,20 +119,34 @@ public class PublicacionController {
     
     
     // EDITAR EL ESTADO DE UNA PUBLCIACIÓN
-     @Operation(summary = "Cambiar estado de publicación")
-    @ApiResponse(responseCode = "200", description = "Estado actualizado")
+    @Operation(summary = "Cambiar estado de publicación")
+    @ApiResponse(responseCode = "200", description = "Estado actualizado o publicación eliminada")
     @PostMapping("/{id}/estado")
-    public ResponseEntity<Publicacion> cambiarEstado(
+    public ResponseEntity<?> cambiarEstado(
             @PathVariable("id") Long id,
             @RequestBody EstadoRequest request) {
         try {
             EstadoPublicacion estado = EstadoPublicacion.valueOf(request.getEstado().toUpperCase());
+
             return service.buscarPorId(id)
                     .map(p -> {
-                        p.setEstado(estado);
-                        return ResponseEntity.ok(service.guardar(p));
+                        if (estado == EstadoPublicacion.DESAPROBADO) {
+                            // Eliminar archivo de S3 si existe
+                            if (p.getImagenUrl() != null && !p.getImagenUrl().isEmpty()) {
+                                String key = p.getImagenUrl().substring(p.getImagenUrl().lastIndexOf("/") + 1);
+                                s3Service.eliminarArchivo("publicaciones/" + key);
+                            }
+                            // Eliminar la publicación de la BD
+                            service.eliminar(p.getId());
+                            return ResponseEntity.ok("Se ha borrado con éxito");
+                        } else {
+                            // Si no es DESAPROBADO, simplemente actualizamos
+                            p.setEstado(estado);
+                            return ResponseEntity.ok(service.guardar(p));
+                        }
                     })
                     .orElse(ResponseEntity.notFound().build());
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
